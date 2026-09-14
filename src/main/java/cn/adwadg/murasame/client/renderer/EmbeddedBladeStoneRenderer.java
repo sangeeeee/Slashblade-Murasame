@@ -4,19 +4,23 @@ import cn.adwadg.murasame.Murasame;
 import cn.adwadg.murasame.TileEntity.BlockEntity.EmbeddedBladeStoneEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
+import mods.flammpfeil.slashblade.client.renderer.model.BladeModelManager;
+import mods.flammpfeil.slashblade.client.renderer.util.BladeRenderState;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 
 public class EmbeddedBladeStoneRenderer implements BlockEntityRenderer<EmbeddedBladeStoneEntity> {
+    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(
+            Murasame.MOD_ID, "models/murasame/murasamemaru.obj");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            Murasame.MOD_ID, "models/murasame/murasamemaru.png");
+    private static final float MODEL_SCALE = 0.00635F;
 
     public EmbeddedBladeStoneRenderer(BlockEntityRendererProvider.Context context) {
     }
@@ -24,55 +28,35 @@ public class EmbeddedBladeStoneRenderer implements BlockEntityRenderer<EmbeddedB
     @Override
     public void render(EmbeddedBladeStoneEntity entity, float partialTicks, PoseStack poseStack,
                        MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
-        if (entity == null) {
-            return;
-        }
-        Level world = entity.getLevel();
-        BlockPos pos = entity.getBlockPos();
+        Level level = entity.getLevel();
+        if (level == null) return;
+        ItemStack blade = entity.getBladeStack();
+        if (blade.isEmpty()) return;
 
-        int blockLight = world.getBrightness(LightLayer.BLOCK, pos.above());
-        int skyLight = world.getBrightness(LightLayer.SKY, pos.above());
-        int packedLight = skyLight << 20 | blockLight << 4;
+        var model = BladeModelManager.getInstance().getModel(MODEL);
+        var lightPos = entity.getBlockPos().above();
+        int light = LightTexture.pack(level.getBrightness(LightLayer.BLOCK, lightPos),
+                level.getBrightness(LightLayer.SKY, lightPos));
 
         poseStack.pushPose();
         try {
-
-            // 使用铁剑作为默认渲染
-            ItemStack ironSword = new ItemStack(Items.IRON_SWORD);
-
-            // 调整位置 - 剑插入石头中
-            poseStack.translate(0.5, 1.3, 0.5); // 降低Y值使剑看起来插入石头
-
-            // 设置旋转 - 剑直立插入
-            poseStack.mulPose(Axis.ZP.rotationDegrees(135)); // 稍微旋转一定角度
-
-            // 调整大小
-            poseStack.scale(1f, 1.2f, 1f);
-
-            // 获取物品渲染器
-            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-
-            // 渲染铁剑
-            itemRenderer.renderStatic(
-                    ironSword,
-                    ItemDisplayContext.FIXED,
-                    packedLight, // 使用手动计算的光照值
-                    combinedOverlay,
-                    poseStack,
-                    buffer,
-                    world,
-                    0
-            );
-
-        } catch (Exception e) {
-            Murasame.LOGGER.error("Error rendering iron sword in stone", e);
+            // Match the 1.1.4-fix placement: the OBJ blade points along -X;
+            // rotating around +Z puts the tip into the stone and the grip above it.
+            poseStack.translate(0.5, 1.8, 0.5);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90));
+            poseStack.scale(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
+            BladeRenderState.renderOverrided(blade, model, "blade", TEXTURE, poseStack, buffer, light);
+            // Optional luminous group supplied by compatible replacement resource packs.
+            BladeRenderState.renderOverridedLuminous(blade, model, "blade_luminous", TEXTURE, poseStack, buffer, light);
         } finally {
+            BladeRenderState.resetCol();
             poseStack.popPose();
         }
     }
 
     @Override
     public boolean shouldRenderOffScreen(EmbeddedBladeStoneEntity entity) {
+        // The hilt extends above the block's normal one-block render bounds.
         return true;
     }
 }

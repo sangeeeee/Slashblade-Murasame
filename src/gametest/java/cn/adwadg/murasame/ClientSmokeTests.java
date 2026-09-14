@@ -24,6 +24,7 @@ public final class ClientSmokeTests {
     private static int stage;
     private static int ticks;
     private static volatile boolean response;
+    private static int screenshotDelay;
 
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post event) {
@@ -62,10 +63,25 @@ public final class ClientSmokeTests {
                 require(client.getEntityRenderDispatcher().getRenderer(soul) != null, "Soul renderer missing");
                 var stone = new EmbeddedBladeStoneEntity(BlockPos.ZERO, ModBlocks.EMBEDDED_STONE.get().defaultBlockState());
                 require(client.getBlockEntityRenderDispatcher().getRenderer(stone) != null, "Stone renderer missing");
+                stone.setLevel(client.level);
+                // Exercise the actual renderer, including OBJ tessellation and buffer submission.
+                var buffers = client.renderBuffers().bufferSource();
+                client.getBlockEntityRenderDispatcher().getRenderer(stone).render(stone, 0,
+                        new com.mojang.blaze3d.vertex.PoseStack(), buffers,
+                        net.minecraft.client.renderer.LightTexture.FULL_BRIGHT,
+                        net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+                buffers.endBatch();
                 var playerId = client.player.getUUID();
                 var server = client.getSingleplayerServer();
                 server.execute(() -> {
-                    PlayerSoulDataManager.getPlayerData(server.getPlayerList().getPlayer(playerId)).setShowMurasameSoul(true);
+                    var player = server.getPlayerList().getPlayer(playerId);
+                    PlayerSoulDataManager.getPlayerData(player).setShowMurasameSoul(true);
+                    // Place both blocks in the disposable test world for the visual check.
+                    player.serverLevel().setDayTime(6000);
+                    player.serverLevel().setBlock(new BlockPos(0, -60, 0), ModBlocks.EMBEDDED_STONE.get().defaultBlockState(), 3);
+                    player.serverLevel().setBlock(new BlockPos(2, -60, 0), ModBlocks.EMPTY_STONE.get().defaultBlockState(), 3);
+                    player.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+                    player.connection.teleport(3.8, -59, 5, 153, 18);
                     response = true;
                 });
                 stage = 1;
@@ -81,9 +97,13 @@ public final class ClientSmokeTests {
                     if (player != null && !PlayerSoulDataManager.getPlayerData(player).shouldShowMurasameSoul()) response = true;
                 });
                 if (response) {
-                    Murasame.LOGGER.info("CLIENT_SMOKE_PASSED: both OBJ models, textures, creative blades, renderers and serverbound soul-toggle payload");
-                    stage = 3;
-                    client.stop();
+                    if (++screenshotDelay >= 60) {
+                        net.minecraft.client.Screenshot.grab(client.gameDirectory, "embedded-stone-smoke.png",
+                                client.getMainRenderTarget(), message -> Murasame.LOGGER.info("Stone screenshot: {}", message.getString()));
+                        Murasame.LOGGER.info("CLIENT_SMOKE_PASSED: both OBJ models, textures, creative blades, actual stone rendering and serverbound soul-toggle payload");
+                        stage = 3;
+                        client.stop();
+                    }
                 }
             }
         } catch (Throwable error) {
