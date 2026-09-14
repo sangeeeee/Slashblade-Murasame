@@ -3,24 +3,32 @@
   "item.murasame.murasamemaru_awakened": "§6Shinto§a「Murasamemaru」",
   "block.murasame.embedded_stone": "Embedded Stone",
   "block.murasame.empty_stone": "Empty Embedded Stone",
-
   "message.murasame.need_level": "You need at least level 50 to take this blade",
   "message.murasame.need_more_undead_kills": "You need at least 500 kills",
   "message.murasame.need_more_buffs": "You need at least 5 kinds of positive effects",
   "message.murasame.evolved": "§6§k111§aMurasamemaru has awakened§6§k111",
-
   "advancements.murasame.get_murasame.title": "§6The Legendary Blade",
   "advancements.murasame.get_murasame.description": "Obtain the Murasamemaru from the sacred shrine",
-
   "entity.murasame.soul": "Murasame",
-
   "itemGroup.murasame_tab": "Murasame",
-
   "se.murasame.murasame_blessing": "Murasame's Blessing",
-
   "slash_art.murasame.spatial_slash": "§a§k11§dSpatial Slash§a§k11",
-
   "key.murasame.toggle_soul": "Toggle Blade Soul Entity",
-
-  "category.murasame": "Murasame"
+  "category.murasame": "Murasame",
+  "subtitles.murasame.yell": "Murasame shouts",
+  "subtitles.murasame.touch": "Murasame reacts to touch",
+  "subtitles.murasame.no": "Murasame refuses",
+  "subtitles.murasame.night": "Murasame says good night",
+  "subtitles.murasame.morning2": "Murasame says good morning",
+  "subtitles.murasame.morning": "Murasame says good morning",
+  "subtitles.murasame.lowhp": "Murasame worries about your wounds",
+  "subtitles.murasame.greeting": "Murasame greets you",
+  "subtitles.murasame.frightened": "Murasame is startled",
+  "subtitles.murasame.drop": "Murasame reacts to being dropped",
+  "subtitles.murasame.comfort": "Murasame comforts you",
+  "subtitles.murasame.after_boss": "Murasame celebrates victory",
+  "subtitles.murasame.afk": "Murasame chats",
+  "subtitles.murasame.afk2": "Murasame chats",
+  "subtitles.murasame.switch": "Murasame reacts to drawing the blade",
+  "entity.murasame.murasame_soul": "Murasame"
 }

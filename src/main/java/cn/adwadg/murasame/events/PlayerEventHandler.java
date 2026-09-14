@@ -1,11 +1,11 @@
 package cn.adwadg.murasame.events;
 
 import cn.adwadg.murasame.Murasame;
-import cn.adwadg.murasame.Registry.KeyBindings;
 import cn.adwadg.murasame.Registry.SoundRegistry;
 import cn.adwadg.murasame.playerdata.PlayerSoulDataManager;
 import cn.adwadg.murasame.playerdata.PlayerSoulData;
 import mods.flammpfeil.slashblade.item.ItemSlashBlade;
+import mods.flammpfeil.slashblade.capability.slashblade.BladeStateAccess;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,24 +16,24 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-@Mod.EventBusSubscriber(modid = Murasame.MOD_ID)
+@EventBusSubscriber(modid = Murasame.MOD_ID)
 public class PlayerEventHandler {
     private static final Map<UUID, ItemStack> lastHeldBlades = new HashMap<>();
     private static final Random random = new Random();
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer player) {
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
 
             checkWeaponSwitch(player);
         }
@@ -52,8 +52,6 @@ public class PlayerEventHandler {
             lastHeldBlades.remove(player.getUUID());
         }
     }
-
-
 
     private static void checkWeaponSwitch(ServerPlayer player) {
         UUID playerId = player.getUUID();
@@ -104,7 +102,7 @@ public class PlayerEventHandler {
                 Murasame.playSound(player, SoundEvents.EXPERIENCE_ORB_PICKUP);
             }
         }
-        lastHeldBlades.put(playerId, currentBlade);
+        lastHeldBlades.put(playerId, currentBlade.copy());
     }
 
     private static ItemStack findAwakenedMurasame(Player player) {
@@ -119,7 +117,7 @@ public class PlayerEventHandler {
 
     private static boolean isAwakenedMurasame(ItemStack stack) {
         return stack.getItem() instanceof ItemSlashBlade &&
-                stack.getCapability(ItemSlashBlade.BLADESTATE)
+                BladeStateAccess.of(stack)
                         .map(state -> "item.murasame.murasamemaru_awakened".equals(state.getTranslationKey()))
                         .orElse(false);
     }

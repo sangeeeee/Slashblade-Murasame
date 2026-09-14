@@ -1,17 +1,17 @@
 package cn.adwadg.murasame.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ModConfig {
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-    public static final ForgeConfigSpec SPEC;
+    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.ConfigValue<Integer> GAINKILLNEEDED;
-    public static final ForgeConfigSpec.ConfigValue<Integer> GAINLEVELNEEDED;
-    public static final ForgeConfigSpec.ConfigValue<Integer> GAINEFFECTSNEEDED;
-    public static final ForgeConfigSpec.ConfigValue<Integer> EVKILLNEEDED;
-    public static final ForgeConfigSpec.ConfigValue<Integer> EVPSNEEDED;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> GAINCLEANLEVEL;
+    public static final ModConfigSpec.ConfigValue<Integer> GAINKILLNEEDED;
+    public static final ModConfigSpec.ConfigValue<Integer> GAINLEVELNEEDED;
+    public static final ModConfigSpec.ConfigValue<Integer> GAINEFFECTSNEEDED;
+    public static final ModConfigSpec.ConfigValue<Integer> EVKILLNEEDED;
+    public static final ModConfigSpec.ConfigValue<Integer> EVPSNEEDED;
+    public static final ModConfigSpec.ConfigValue<Boolean> GAINCLEANLEVEL;
 
     static {
         BUILDER.push("general");

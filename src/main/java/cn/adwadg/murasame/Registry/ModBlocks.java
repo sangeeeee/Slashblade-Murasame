@@ -7,25 +7,23 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS =
-            DeferredRegister.create(ForgeRegistries.BLOCKS, Murasame.MOD_ID);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Murasame.MOD_ID);
+            DeferredRegister.create(Registries.BLOCK, Murasame.MOD_ID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, Murasame.MOD_ID);
 
-    public static final RegistryObject<Block> EMBEDDED_STONE = BLOCKS.register("embedded_stone",
-            () -> new EmbeddedBladeStoneBlock(BlockBehaviour.Properties.copy(Blocks.STONE)));
-    public static final RegistryObject<Block> EMPTY_STONE = BLOCKS.register("empty_stone",
-            () -> new Block(BlockBehaviour.Properties.copy(Blocks.STONE)));
+    public static final DeferredHolder<Block, Block> EMBEDDED_STONE = BLOCKS.register("embedded_stone",
+            () -> new EmbeddedBladeStoneBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
+    public static final DeferredHolder<Block, Block> EMPTY_STONE = BLOCKS.register("empty_stone",
+            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
 
-    public static final RegistryObject<Item> EMBEDDED_STONE_ITEM = ITEMS.register("embedded_stone",
+    public static final DeferredHolder<Item, Item> EMBEDDED_STONE_ITEM = ITEMS.register("embedded_stone",
             () -> new BlockItem(EMBEDDED_STONE.get(), new Item.Properties()));
-    public static final RegistryObject<Item> EMPTY_STONE_ITEM = ITEMS.register("empty_stone",
+    public static final DeferredHolder<Item, Item> EMPTY_STONE_ITEM = ITEMS.register("empty_stone",
             () -> new BlockItem(EMPTY_STONE.get(), new Item.Properties()));
-
-
 
 }

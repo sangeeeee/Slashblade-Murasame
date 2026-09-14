@@ -1,27 +1,34 @@
 {
   "item.murasame.murasamemaru": "§d名刀§2「丛雨丸」",
   "item.murasame.murasamemaru_awakened": "§6神刀§a「丛雨丸」",
-
   "block.murasame.embedded_stone": "嵌刀石",
   "block.murasame.empty_stone": "空嵌刀石",
-
   "message.murasame.need_level": "丛雨丸拒绝了你，你需要更多经验",
   "message.murasame.need_more_undead_kills": "丛雨丸拒绝了你，你需要证明你除秽的能力",
   "message.murasame.need_more_buffs": "丛雨丸拒绝了你，你需要更多力量",
   "message.murasame.evolved": "§6§k111§a丛雨丸觉醒了刀魂§6§k111",
-
   "advancements.murasame.get_murasame.title": "§6传说之刃",
   "advancements.murasame.get_murasame.description": "从石头中拔出丛雨丸",
-
   "entity.murasame.soul": "丛雨",
-
   "itemGroup.murasame_tab": "丛雨",
-
   "se.murasame.murasame_blessing": "§a丛雨祝福",
-
   "slash_art.murasame.spatial_slash": "§a§k11§d空间斩§a§k11",
-
   "key.murasame.toggle_soul": "隐藏/显示刀魂实体",
-
-  "category.murasame": "丛雨"
+  "category.murasame": "丛雨",
+  "subtitles.murasame.yell": "丛雨喊叫",
+  "subtitles.murasame.touch": "丛雨回应触碰",
+  "subtitles.murasame.no": "丛雨拒绝",
+  "subtitles.murasame.night": "丛雨道晚安",
+  "subtitles.murasame.morning2": "丛雨道早安",
+  "subtitles.murasame.morning": "丛雨道早安",
+  "subtitles.murasame.lowhp": "丛雨担心你的伤势",
+  "subtitles.murasame.greeting": "丛雨问候",
+  "subtitles.murasame.frightened": "丛雨受到惊吓",
+  "subtitles.murasame.drop": "丛雨回应丢刀",
+  "subtitles.murasame.comfort": "丛雨安慰你",
+  "subtitles.murasame.after_boss": "丛雨庆祝胜利",
+  "subtitles.murasame.afk": "丛雨闲聊",
+  "subtitles.murasame.afk2": "丛雨闲聊",
+  "subtitles.murasame.switch": "丛雨回应拔刀",
+  "entity.murasame.murasame_soul": "丛雨"
 }

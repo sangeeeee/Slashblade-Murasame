@@ -6,26 +6,29 @@ import mods.flammpfeil.slashblade.SlashBlade;
 import mods.flammpfeil.slashblade.ability.StunManager;
 import mods.flammpfeil.slashblade.registry.combo.ComboState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public class ComboStateRegistry {
     public static final DeferredRegister<ComboState> COMBO_STATES =
             DeferredRegister.create(ComboState.REGISTRY_KEY, Murasame.MOD_ID);
 
-    public static final RegistryObject<ComboState> SPATIAL_SLASH = COMBO_STATES.register("spatial_slash",
+    public static final DeferredHolder<ComboState, ComboState> SPATIAL_SLASH = COMBO_STATES.register("spatial_slash",
             ComboState.Builder.newInstance()
                     .startAndEnd(0, 60)  // 缩短为60帧，更紧凑
                     .priority(60)
+                    .timeout(800) // Keep the combo alive through its tick-40 recovery action.
                     .speed(1.5F)  // 进一步加快动画速度
                     .next(entity -> SlashBlade.prefix("none"))
                     .nextOfTimeout(entity -> SlashBlade.prefix("none"))
 
                     // 立即开始空间固定和第一轮斩击
                     .addTickAction(ComboState.TimeLineTickAction.getBuilder()
-                            .put(0, SpatialSlash::doSpatialSlash) // 立即空间固定
-                            .put(0, (entityIn) -> entityIn.setDeltaMovement(Vec3.ZERO)) // 完全停止移动
-                            .put(0, (entity) -> SpatialSlash.executeSingleSlash(entity, 0, 1.0F)) // 立即第1道斩击
+                            .put(0, entity -> {
+                                SpatialSlash.doSpatialSlash(entity);
+                                entity.setDeltaMovement(Vec3.ZERO);
+                                SpatialSlash.executeSingleSlash(entity, 0, 1.0F);
+                            })
                             .build())
 
                     // 连续斩击序列 - 从第0帧立即开始

@@ -10,12 +10,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -64,8 +62,8 @@ public class EmbeddedBladeStoneBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!level.isClientSide() && hand == InteractionHand.MAIN_HAND) {
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!level.isClientSide()) {
             BlockEntity be = level.getBlockEntity(pos);
             if (!(be instanceof EmbeddedBladeStoneEntity entity)) {
                 return InteractionResult.FAIL;
@@ -101,11 +99,6 @@ public class EmbeddedBladeStoneBlock extends Block implements EntityBlock {
                 player.drop(blade, false);
             }
 
-            // 播放音效
-            level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8f, 1.2f);
-            if (!player.getInventory().add(blade)) {
-                player.drop(blade, false);
-            }
 
             // 授予成就 - 现在会验证拔刀剑属性
             if (player instanceof ServerPlayer serverPlayer) {
@@ -113,12 +106,12 @@ public class EmbeddedBladeStoneBlock extends Block implements EntityBlock {
             }
 
             if(ModConfig.GAINCLEANLEVEL.get()){
-                player.experienceLevel -= ModConfig.GAINLEVELNEEDED.get();
+                player.giveExperienceLevels(-ModConfig.GAINLEVELNEEDED.get());
             }
             level.setBlock(pos, ModBlocks.EMPTY_STONE.get().defaultBlockState(), 3);
             return InteractionResult.SUCCESS;
         }
-        return InteractionResult.PASS;
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 
     // 检查是否击杀足够多的亡灵生物
@@ -137,7 +130,7 @@ public class EmbeddedBladeStoneBlock extends Block implements EntityBlock {
     private boolean hasEnoughPositiveBuffs(Player player) {
         List<MobEffectInstance> positiveEffects = player.getActiveEffects()
                 .stream()
-                .filter(effect -> effect.getEffect().getCategory() == MobEffectCategory.BENEFICIAL)
+                .filter(effect -> effect.getEffect().value().getCategory() == MobEffectCategory.BENEFICIAL)
                 .collect(Collectors.toList());
         return positiveEffects.size() >= ModConfig.GAINEFFECTSNEEDED.get();
     }

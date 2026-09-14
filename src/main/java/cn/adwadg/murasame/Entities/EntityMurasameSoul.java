@@ -1,15 +1,9 @@
 package cn.adwadg.murasame.Entities;
 
 import cn.adwadg.murasame.Murasame;
-import cn.adwadg.murasame.client.utils.CombatTracker;
-import com.mojang.datafixers.kinds.IdF;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -24,7 +18,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkHooks;
+
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -62,8 +56,6 @@ public class EntityMurasameSoul extends PathfinderMob {
     private Player cachedOwner;
     public int hideCooldown = 0;
 
-
-
     public EntityMurasameSoul(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
         this.setInvulnerable(true);
@@ -81,10 +73,10 @@ public class EntityMurasameSoul extends PathfinderMob {
 
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(OWNER_UUID, Optional.empty());
-        this.entityData.define(VISIBLE, true);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(OWNER_UUID, Optional.empty());
+        builder.define(VISIBLE, true);
     }
 
     @Override
@@ -115,7 +107,7 @@ public class EntityMurasameSoul extends PathfinderMob {
         this.setInvisible(!visibility);
         this.entityData.set(VISIBLE, visibility);
     }
-    
+
     public boolean isVisible() {
         return this.entityData.get(VISIBLE);
     }
@@ -166,12 +158,12 @@ public class EntityMurasameSoul extends PathfinderMob {
             // 存活检查
             if (this.cachedOwner != null) {
                 // 如果Owner死亡或距离过远(>64格)
-                if (!this.cachedOwner.isAlive() ||
+                if (!this.cachedOwner.isAlive() || this.cachedOwner.isRemoved() || this.cachedOwner.level() != this.level() ||
                         this.distanceToSqr(this.cachedOwner) > 4096) {
                     this.discard();
                     return;
                 }
-                if(cachedOwner.getXRot()!=lastX || cachedOwner.getY()!=lastY){
+                if (cachedOwner != null) {
                     updatePosition();
                 }
             }
@@ -229,8 +221,6 @@ public class EntityMurasameSoul extends PathfinderMob {
                 .subtract(0, this.getBbHeight() / 2, 0); // 调整高度使实体站在地面上
     }
 
-
-
     // 添加安全校验
     @Override
     public void setYRot(float yRot) {
@@ -252,16 +242,16 @@ public class EntityMurasameSoul extends PathfinderMob {
 
     @Override
     public void remove(RemovalReason reason) {
-        Murasame.LOGGER.warn("实体被移除 | 原因: {} | Tick: {} | 位置: {},{},{}",
+        Murasame.LOGGER.debug("实体被移除 | 原因: {} | Tick: {} | 位置: {},{},{}",
                 reason, aliveTicks, getX(), getY(), getZ());
         super.remove(reason);
     }
 
 
     public void setOwner(Player player) {
-        this.cachedOwner = player;
         UUID uuid = player.getUUID();
         this.entityData.set(OWNER_UUID, Optional.of(uuid));
+        this.cachedOwner = player;
     }
 
 
@@ -287,11 +277,7 @@ public class EntityMurasameSoul extends PathfinderMob {
         super.onSyncedDataUpdated(key);
     }
 
-    @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        // 确保使用Forge的网络系统
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
+
     @Override
     public void recreateFromPacket(ClientboundAddEntityPacket packet) {
         super.recreateFromPacket(packet);

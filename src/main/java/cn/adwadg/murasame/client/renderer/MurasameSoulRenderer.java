@@ -14,6 +14,6 @@ public class MurasameSoulRenderer extends MobRenderer<EntityMurasameSoul, QPlaye
 
     @Override
     public ResourceLocation getTextureLocation(EntityMurasameSoul entity) {
-        return new ResourceLocation("murasame:textures/entity/murasame_soul/default.png");
+        return ResourceLocation.fromNamespaceAndPath("murasame", "textures/entity/murasame_soul/default.png");
     }
 }

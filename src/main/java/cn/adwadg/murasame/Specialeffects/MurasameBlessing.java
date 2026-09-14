@@ -3,122 +3,65 @@ package cn.adwadg.murasame.Specialeffects;
 import cn.adwadg.murasame.Murasame;
 import cn.adwadg.murasame.Registry.SERegistry;
 import mods.flammpfeil.slashblade.event.SlashBladeEvent;
-import mods.flammpfeil.slashblade.item.ItemSlashBlade;
 import mods.flammpfeil.slashblade.registry.specialeffects.SpecialEffect;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = Murasame.MOD_ID)
+@EventBusSubscriber(modid = Murasame.MOD_ID)
 public class MurasameBlessing extends SpecialEffect {
-    private static int critCoolDown = 0;
-    private static boolean isLowHP = false;
-    private static float kbBoost = 0;
-    private static String effectBlade = "";
-    private static LivingEntity owner;
-    public MurasameBlessing(){
-        super(50,false,false);
-    }
-    @SubscribeEvent
-    public static void onPlayerTick(SlashBladeEvent.UpdateEvent event){
+    private static final String CRIT_READY = "murasame:blessing_crit_ready";
+    public MurasameBlessing() { super(50, false, false); }
 
-
-
-        if(!(event.getEntity() instanceof Player player) || !event.isSelected()){
-            return;
-        }
-        if(critCoolDown!=0){
-            critCoolDown-=1;
-        }
-        isLowHP= player.getHealth() <= player.getMaxHealth() * 0.4;
-        kbBoost= 2f - player.getHealth()/player.getMaxHealth() * 2f;
-
-        int level = player.experienceLevel;
-        if(SpecialEffect.isEffective(SERegistry.MURASAME_BLESSING.get(),level)){
-            if(event.isSelected()){
-                effectBlade = event.getSlashBladeState().getTranslationKey();
-            }
-            if(effectBlade.equals("item.murasame.murasamemaru_awakened")){
-                if(!player.hasEffect(MobEffects.DAMAGE_RESISTANCE)){
-                    player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,40,2,false,false));
-                }
-                if(!player.hasEffect(MobEffects.REGENERATION)){
-                    player.addEffect(new MobEffectInstance(MobEffects.REGENERATION,40,1,false,false));
-                }
-                if(!player.hasEffect(MobEffects.DAMAGE_BOOST)){
-                    player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,40,1,false,false));
-                }
-            }
-        }
-    }
-    @SubscribeEvent
-    public static void onSlashHit(SlashBladeEvent.HitEvent event){
-        owner = event.getUser();
-        int level;
-        LivingEntity target = event.getTarget();
-        if((event.getUser() instanceof Player player)){
-            level = player.experienceLevel;
-        }else{
-            level = 50;
-        }
-        if(SpecialEffect.isEffective(SERegistry.MURASAME_BLESSING.get(),level) && isLowHP && effectBlade.equals("item.murasame.murasamemaru_awakened")) {
-            applyKnockback(event.getUser(),target,kbBoost);
-        }
+    private static boolean active(SlashBladeEvent event, LivingEntity user) {
+        return !user.level().isClientSide()
+                && "item.murasame.murasamemaru_awakened".equals(event.getSlashBladeState().getTranslationKey())
+                && event.getSlashBladeState().hasSpecialEffect(SERegistry.MURASAME_BLESSING.getId())
+                && SpecialEffect.isEffective(SERegistry.MURASAME_BLESSING.get(), user instanceof Player player ? player.experienceLevel : 50);
     }
 
     @SubscribeEvent
-    public static void onSlash(SlashBladeEvent.DoSlashEvent event){
-        Murasame.LOGGER.debug("Event user:{}",event.getUser().getType());
-        int level;
-        if((event.getUser() instanceof Player player)){
-            level = player.experienceLevel;
-        }else{
-            level = 50;
-        }
-        if(SpecialEffect.isEffective(SERegistry.MURASAME_BLESSING.get(),level)){
-            if(critCoolDown==0 && isLowHP && effectBlade.equals("item.murasame.murasamemaru_awakened")){
-                event.getSlashBladeState().setColorCode(8388736);
-                event.setCritical(true);
-                event.setDamage(event.getDamage() + event.getDamage()*0.5f);
-                critCoolDown=200;
-            }else {
-                if(effectBlade.equals("item.murasame.murasamemaru_awakened")){
-                    event.getSlashBladeState().setColorCode(65350);
-                }
-            }
+    public static void onPlayerTick(SlashBladeEvent.UpdateEvent event) {
+        if (!(event.getEntity() instanceof Player player) || !event.isSelected() || !active(event, player)) return;
+        if (!player.hasEffect(MobEffects.DAMAGE_RESISTANCE))
+            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 40, 2, false, false));
+        if (!player.hasEffect(MobEffects.REGENERATION))
+            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 40, 1, false, false));
+        if (!player.hasEffect(MobEffects.DAMAGE_BOOST))
+            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 40, 1, false, false));
+    }
+
+    @SubscribeEvent
+    public static void onSlashHit(SlashBladeEvent.HitEvent event) {
+        LivingEntity user = event.getUser();
+        if (active(event, user) && user.getHealth() <= user.getMaxHealth() * 0.4F)
+            applyKnockback(user, event.getTarget(), 2F - user.getHealth() / user.getMaxHealth() * 2F);
+    }
+
+    @SubscribeEvent
+    public static void onSlash(SlashBladeEvent.DoSlashEvent event) {
+        LivingEntity user = event.getUser();
+        if (!active(event, user)) return;
+        long now = user.level().getGameTime();
+        if (user.getHealth() <= user.getMaxHealth() * 0.4F && now >= user.getPersistentData().getLong(CRIT_READY)) {
+            event.getSlashBladeState().setColorCode(8388736);
+            event.setCritical(true);
+            event.setDamage(event.getDamage() * 1.5F);
+            user.getPersistentData().putLong(CRIT_READY, now + 200);
+        } else {
+            event.getSlashBladeState().setColorCode(65350);
         }
     }
 
     public static void applyKnockback(LivingEntity attacker, LivingEntity target, float strength) {
-        Vec3 direction = new Vec3(
-                target.getX() - attacker.getX(),
-                0,
-                target.getZ() - attacker.getZ()
-        );
-
-        if (direction.length() > 0) {
-            direction = direction.normalize();
-        } else {
-            direction = new Vec3(
-                    (Math.random() - 0.5) * 2,
-                    0,
-                    (Math.random() - 0.5) * 2
-            ).normalize();
-        }
-        target.setDeltaMovement(
-                target.getDeltaMovement().x + direction.x * strength,
-                target.getDeltaMovement().y + 0.3,
-                target.getDeltaMovement().z + direction.z * strength
-        );
-
+        Vec3 direction = target.position().subtract(attacker.position()).multiply(1, 0, 1);
+        if (direction.lengthSqr() < 1.0E-6) direction = attacker.getLookAngle().multiply(1, 0, 1);
+        direction = direction.normalize();
+        target.setDeltaMovement(target.getDeltaMovement().add(direction.x * strength, 0.3, direction.z * strength));
         target.hasImpulse = true;
     }
 }

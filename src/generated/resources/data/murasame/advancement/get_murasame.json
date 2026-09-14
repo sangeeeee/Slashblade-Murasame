@@ -5,16 +5,15 @@
     }
   },
   "display": {
-    "announce_to_chat": true,
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
     "description": {
       "translate": "advancements.murasame.get_murasame.description"
     },
     "frame": "challenge",
-    "hidden": false,
     "icon": {
-      "item": "slashblade:slashblade"
+      "count": 1,
+      "id": "slashblade:slashblade"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.murasame.get_murasame.title"
     }

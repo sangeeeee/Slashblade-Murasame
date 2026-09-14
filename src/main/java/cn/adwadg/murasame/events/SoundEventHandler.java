@@ -4,8 +4,7 @@ import cn.adwadg.murasame.Murasame;
 import cn.adwadg.murasame.Registry.SoundRegistry;
 import cn.adwadg.murasame.client.utils.MurasameEvolutionTracker;
 import mods.flammpfeil.slashblade.item.ItemSlashBlade;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import mods.flammpfeil.slashblade.capability.slashblade.BladeStateAccess;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -13,21 +12,21 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
-import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerWakeUpEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-@Mod.EventBusSubscriber(modid = Murasame.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = Murasame.MOD_ID)
 public class SoundEventHandler {
     private static final Random random = new Random();
     private static final Map<UUID, Boolean> wasInCombat = new HashMap<>();
@@ -41,9 +40,9 @@ public class SoundEventHandler {
         for (InteractionHand hand : InteractionHand.values()) {
             ItemStack stack = player.getItemInHand(hand);
             if (stack.getItem() instanceof ItemSlashBlade) {
-                return stack.getCapability(ItemSlashBlade.BLADESTATE)
+                if (BladeStateAccess.of(stack)
                         .map(state -> "item.murasame.murasamemaru_awakened".equals(state.getTranslationKey()))
-                        .orElse(false);
+                        .orElse(false)) return true;
             }
         }
         return false;
@@ -82,12 +81,12 @@ public class SoundEventHandler {
 
     // 2. 玩家睡觉时播放
     @SubscribeEvent
-    public static void onPlayerSleep(PlayerSleepInBedEvent event) {
+    public static void onPlayerSleep(CanPlayerSleepEvent event) {
         Player player = event.getEntity();
         Level level = player.level();
         long time = level.getDayTime() % 24000;
         if(time >= 13000 && time < 23000){
-            if (event.getResultStatus() == null && isHoldingAwakenedMurasame(player)) {
+            if (event.getProblem() == null && isHoldingAwakenedMurasame(player)) {
                 Murasame.playSound(player, SoundRegistry.MURASAME_NIGHT.get());
             }
         }
@@ -95,10 +94,10 @@ public class SoundEventHandler {
 
     // 3. 玩家血量小于50%时播放（带冷却）
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (event.getEntity().level().isClientSide()) return;
 
-        Player player = event.player;
+        Player player = event.getEntity();
         UUID playerId = player.getUUID();
 
 
@@ -132,6 +131,7 @@ public class SoundEventHandler {
             }
             wasInCombat.put(playerId, inCombat);
         }
+        frightenedCooldown.computeIfPresent(playerId, (id, ticks) -> ticks > 1 ? ticks - 1 : null);
         checkAfkState(player);
         // 新增武器切换检测
     }
@@ -176,7 +176,7 @@ public class SoundEventHandler {
         ItemStack stack = event.getEntity().getItem();
 
         if (stack.getItem() instanceof ItemSlashBlade &&
-                stack.getCapability(ItemSlashBlade.BLADESTATE)
+                BladeStateAccess.of(stack)
                         .map(state -> "item.murasame.murasamemaru_awakened".equals(state.getTranslationKey()))
                         .orElse(false)) {
             Murasame.playSound(player, SoundRegistry.MURASAME_DROP.get());
@@ -201,5 +201,15 @@ public class SoundEventHandler {
         if (isHoldingAwakenedMurasame(player)) {
             Murasame.playSound(player, SoundRegistry.MURASAME_COMFORT.get());
         }
+    }
+
+    @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        UUID id = event.getEntity().getUUID();
+        wasInCombat.remove(id);
+        lowHpCooldown.remove(id);
+        frightenedCooldown.remove(id);
+        lastPlayerPositions.remove(id);
+        afkCooldowns.remove(id);
     }
 }

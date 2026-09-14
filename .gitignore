@@ -1,0 +1,9 @@
+.gradle/
+.idea/
+build/
+run/
+run-data/
+.porting/
+*.iml
+*.log
+src/generated/resources/.cache/

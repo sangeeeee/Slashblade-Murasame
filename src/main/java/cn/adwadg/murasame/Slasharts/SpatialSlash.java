@@ -10,7 +10,7 @@ import java.util.WeakHashMap;
 
 public class SpatialSlash {
 
-    private static final WeakHashMap<LivingEntity, Vec3> frozenEntities = new WeakHashMap<>();
+    private static final WeakHashMap<LivingEntity, java.util.Map<LivingEntity, Vec3>> frozenEntities = new WeakHashMap<>();
     private static final WeakHashMap<LivingEntity, Vec3> playerOriginalSpeeds = new WeakHashMap<>();
 
     public static void doSpatialSlash(LivingEntity entity) {
@@ -35,10 +35,12 @@ public class SpatialSlash {
                 currentMovement.z * 0.4
         ));
 
+        var targets = new WeakHashMap<LivingEntity, Vec3>();
+        frozenEntities.put(entity, targets);
         // 固定周围生物
         for (LivingEntity target : entities) {
             if (target != entity && target.isAlive()) {
-                frozenEntities.put(target, target.getDeltaMovement());
+                targets.put(target, target.getDeltaMovement());
                 target.setDeltaMovement(Vec3.ZERO);
             }
         }
@@ -54,16 +56,18 @@ public class SpatialSlash {
         SpatialParticleEffects.createTimeResumeEffect(entity);
 
         // 释放所有被固定的生物
-        for (LivingEntity target : frozenEntities.keySet()) {
+        var targets = frozenEntities.remove(entity);
+        if (targets == null) targets = java.util.Map.of();
+        for (LivingEntity target : targets.keySet()) {
             if (target != null && target.isAlive()) {
-                Vec3 originalMovement = frozenEntities.get(target);
+                Vec3 originalMovement = targets.get(target);
                 if (originalMovement != null) {
                     target.setDeltaMovement(originalMovement);
                 }
-                target.setNoGravity(false);
+
             }
         }
-        frozenEntities.clear();
+
 
         // 恢复玩家速度
         Vec3 originalSpeed = playerOriginalSpeeds.get(entity);
@@ -76,17 +80,8 @@ public class SpatialSlash {
     public static void executeSingleSlash(LivingEntity entity, float angle, float power) {
         if (entity.level().isClientSide()) return;
 
-        ServerLevel level = (ServerLevel) entity.level();
-
         // 执行单道斩击，根据power调整威力
         AttackManager.doSlash(entity, angle, Vec3.ZERO, true, false, power);
-
-        // 同步粒子效果 - 根据威力调整粒子强度
-        int particleCount = (int) (power * 10);
-
-        // 轻微屏幕震动效果（近距离）
-        if (power >= 1.3F) {
-        }
     }
 
 }

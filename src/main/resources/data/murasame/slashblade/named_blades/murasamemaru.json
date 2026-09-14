@@ -15,9 +15,7 @@
     "attack_base": 18.0,
     "max_damage": 150,
     "slash_art": "slashblade:wave_edge",
-    "special_effects": [
-
-    ],
+    "special_effects": [],
     "sword_type": [
       "bewitched"
     ]
@@ -27,5 +25,6 @@
     "model": "murasame:models/murasame/murasamemaru.obj",
     "texture": "murasame:models/murasame/murasamemaru.png",
     "summon_sword_color": 65350
-  }
+  },
+  "creativeGroup": "murasame:murasame_tab"
 }
