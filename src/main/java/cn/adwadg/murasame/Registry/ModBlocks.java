@@ -17,9 +17,10 @@ public class ModBlocks {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, Murasame.MOD_ID);
 
     public static final DeferredHolder<Block, Block> EMBEDDED_STONE = BLOCKS.register("embedded_stone",
-            () -> new EmbeddedBladeStoneBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
+            () -> new EmbeddedBladeStoneBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE).noLootTable()));
+    // Legacy ID retained only so already-empty stones in old saves stay empty.
     public static final DeferredHolder<Block, Block> EMPTY_STONE = BLOCKS.register("empty_stone",
-            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
+            () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE).noLootTable()));
 
     public static final DeferredHolder<Item, Item> EMBEDDED_STONE_ITEM = ITEMS.register("embedded_stone",
             () -> new BlockItem(EMBEDDED_STONE.get(), new Item.Properties()));

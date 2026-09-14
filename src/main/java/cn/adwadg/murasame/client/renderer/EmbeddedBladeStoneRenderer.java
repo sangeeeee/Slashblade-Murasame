@@ -30,6 +30,8 @@ public class EmbeddedBladeStoneRenderer implements BlockEntityRenderer<EmbeddedB
                        MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         Level level = entity.getLevel();
         if (level == null) return;
+        // Unknown views remain hidden until the server supplies this player's state.
+        if (!entity.shouldRenderBlade()) return;
         ItemStack blade = entity.getBladeStack();
         if (blade.isEmpty()) return;
 

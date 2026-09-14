@@ -46,7 +46,6 @@ public class Murasame {
                     // SlashBlade adds named blades using each definition's creativeGroup.
                     .displayItems((parameters, output) -> {
                         output.accept(ModBlocks.EMBEDDED_STONE_ITEM.get());
-                        output.accept(ModBlocks.EMPTY_STONE_ITEM.get());
                     }).build());
 
     public Murasame(IEventBus modBus, ModContainer container) {

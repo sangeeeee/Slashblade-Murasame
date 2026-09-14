@@ -30,5 +30,6 @@
   "subtitles.murasame.afk": "Murasame chats",
   "subtitles.murasame.afk2": "Murasame chats",
   "subtitles.murasame.switch": "Murasame reacts to drawing the blade",
-  "entity.murasame.murasame_soul": "Murasame"
+  "entity.murasame.murasame_soul": "Murasame",
+  "message.murasame.already_claimed": "You have already claimed the blade from this stone."
 }

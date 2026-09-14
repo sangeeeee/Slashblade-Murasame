@@ -25,6 +25,7 @@ public final class ClientSmokeTests {
     private static int ticks;
     private static volatile boolean response;
     private static int screenshotDelay;
+    private static int startupDelay;
 
     @SubscribeEvent
     public static void tick(ClientTickEvent.Post event) {
@@ -48,6 +49,12 @@ public final class ClientSmokeTests {
         if (client.level == null || client.player == null || client.getSingleplayerServer() == null) return;
         try {
             if (stage == 0) {
+                if (++startupDelay < 40) return;
+                // On subsequent runs, these come solely from persisted claims and ChunkWatchEvent.Sent.
+                if (client.level.getBlockEntity(new BlockPos(2, -60, 0)) instanceof EmbeddedBladeStoneEntity previous) {
+                    require(previous.isClientViewKnown() && !previous.shouldRenderBlade(), "Rejoining lost the saved personal view");
+                    Murasame.LOGGER.info("CLIENT_STONE_REJOIN_PASSED");
+                }
                 var models = BladeModelManager.getInstance();
                 for (var blade : java.util.List.of("murasamemaru", "murasamemaru_awakened")) {
                     var model = ResourceLocation.fromNamespaceAndPath(Murasame.MOD_ID, "models/murasame/" + blade + ".obj");
@@ -64,6 +71,7 @@ public final class ClientSmokeTests {
                 var stone = new EmbeddedBladeStoneEntity(BlockPos.ZERO, ModBlocks.EMBEDDED_STONE.get().defaultBlockState());
                 require(client.getBlockEntityRenderDispatcher().getRenderer(stone) != null, "Stone renderer missing");
                 stone.setLevel(client.level);
+                stone.applyClientView(java.util.UUID.randomUUID(), false);
                 // Exercise the actual renderer, including OBJ tessellation and buffer submission.
                 var buffers = client.renderBuffers().bufferSource();
                 client.getBlockEntityRenderDispatcher().getRenderer(stone).render(stone, 0,
@@ -79,7 +87,13 @@ public final class ClientSmokeTests {
                     // Place both blocks in the disposable test world for the visual check.
                     player.serverLevel().setDayTime(6000);
                     player.serverLevel().setBlock(new BlockPos(0, -60, 0), ModBlocks.EMBEDDED_STONE.get().defaultBlockState(), 3);
-                    player.serverLevel().setBlock(new BlockPos(2, -60, 0), ModBlocks.EMPTY_STONE.get().defaultBlockState(), 3);
+                    player.serverLevel().setBlock(new BlockPos(2, -60, 0), ModBlocks.EMBEDDED_STONE.get().defaultBlockState(), 3);
+                    for (var pos : java.util.List.of(new BlockPos(0, -60, 0), new BlockPos(2, -60, 0))) {
+                        var placed = (EmbeddedBladeStoneEntity) player.serverLevel().getBlockEntity(pos);
+                        placed.resetForPlacement();
+                        placed.syncTrackingPlayers();
+                        if (pos.getX() == 2) placed.tryClaim(player);
+                    }
                     player.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
                     player.connection.teleport(3.8, -59, 5, 153, 18);
                     response = true;
@@ -97,10 +111,22 @@ public final class ClientSmokeTests {
                     if (player != null && !PlayerSoulDataManager.getPlayerData(player).shouldShowMurasameSoul()) response = true;
                 });
                 if (response) {
-                    if (++screenshotDelay >= 60) {
+                    if (++screenshotDelay == 40) {
+                        server.execute(() -> {
+                            var level = server.overworld();
+                            var pos = new BlockPos(2, -60, 0);
+                            level.sendBlockUpdated(pos, level.getBlockState(pos), level.getBlockState(pos), 2);
+                        });
+                    }
+                    if (screenshotDelay >= 60) {
+                        var available = (EmbeddedBladeStoneEntity) client.level.getBlockEntity(new BlockPos(0, -60, 0));
+                        var claimed = (EmbeddedBladeStoneEntity) client.level.getBlockEntity(new BlockPos(2, -60, 0));
+                        require(available != null && available.isClientViewKnown() && available.shouldRenderBlade(), "Available stone view missing");
+                        require(claimed != null && claimed.isClientViewKnown() && !claimed.shouldRenderBlade(), "Claimed stone view incorrect");
+                        require(!available.getClientDisplayName().getString().equals(claimed.getClientDisplayName().getString()), "Personal names did not differ");
                         net.minecraft.client.Screenshot.grab(client.gameDirectory, "embedded-stone-smoke.png",
                                 client.getMainRenderTarget(), message -> Murasame.LOGGER.info("Stone screenshot: {}", message.getString()));
-                        Murasame.LOGGER.info("CLIENT_SMOKE_PASSED: both OBJ models, textures, creative blades, actual stone rendering and serverbound soul-toggle payload");
+                        Murasame.LOGGER.info("CLIENT_SMOKE_PASSED: both OBJ models, textures, creative blades, actual stone rendering, personal stone views/names after generic updates and serverbound soul-toggle payload");
                         stage = 3;
                         client.stop();
                     }

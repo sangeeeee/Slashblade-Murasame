@@ -169,7 +169,9 @@ public class MurasameGameTests {
         state.useWithoutItem(helper.getLevel(), player, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
         int count = player.getInventory().items.stream().filter(MurasameEvolutionTracker::isValidBlade).mapToInt(ItemStack::getCount).sum();
         helper.assertTrue(count == 1, "Stone must grant exactly one blade");
-        helper.assertBlockPresent(ModBlocks.EMPTY_STONE.get(), relative);
+        helper.assertBlockPresent(ModBlocks.EMBEDDED_STONE.get(), relative);
+        helper.assertTrue(((cn.adwadg.murasame.TileEntity.BlockEntity.EmbeddedBladeStoneEntity)
+                helper.getLevel().getBlockEntity(pos)).hasClaimed(player.getUUID()), "Claim was not recorded for this player");
         helper.assertTrue(!ModConfig.GAINCLEANLEVEL.get() || player.experienceLevel == 0, "Extraction did not charge the configured levels");
         var advancement = player.server.getAdvancements().get(id("get_murasame"));
         helper.assertTrue(player.getAdvancements().getOrStartProgress(advancement).isDone(), "Extraction advancement not awarded");

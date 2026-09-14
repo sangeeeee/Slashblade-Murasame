@@ -30,5 +30,6 @@
   "subtitles.murasame.afk": "丛雨闲聊",
   "subtitles.murasame.afk2": "丛雨闲聊",
   "subtitles.murasame.switch": "丛雨回应拔刀",
-  "entity.murasame.murasame_soul": "丛雨"
+  "entity.murasame.murasame_soul": "丛雨",
+  "message.murasame.already_claimed": "你已经从这块嵌刀石拔出过丛雨丸。"
 }

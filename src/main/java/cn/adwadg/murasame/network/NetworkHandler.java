@@ -4,6 +4,8 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 public final class NetworkHandler {
     public static void register(RegisterPayloadHandlersEvent event) {
-        event.registrar("2").playToServer(ToggleKeyPacket.TYPE, ToggleKeyPacket.STREAM_CODEC, ToggleKeyPacket::handle);
+        var registrar = event.registrar("3");
+        registrar.playToServer(ToggleKeyPacket.TYPE, ToggleKeyPacket.STREAM_CODEC, ToggleKeyPacket::handle);
+        registrar.playToClient(StoneStatePacket.TYPE, StoneStatePacket.STREAM_CODEC, StoneStatePacket::handle);
     }
 }
