@@ -63,9 +63,9 @@ public final class ClientSmokeTests {
                     require(client.getResourceManager().getResource(texture).isPresent(), "Blade texture missing: " + blade);
                 }
                 CreativeModeTabs.tryRebuildTabContents(client.level.enabledFeatures(), true, client.level.registryAccess());
-                long blades = Murasame.MURASAME_TAB.get().getDisplayItems().stream()
+                long blades = mods.flammpfeil.slashblade.SlashBladeCreativeGroup.SLASHBLADE_GROUP.get().getDisplayItems().stream()
                         .filter(stack -> BladeStateAccess.of(stack).map(state -> state.getTranslationKey().startsWith("item.murasame.")).orElse(false)).count();
-                require(blades == 2, "Expected both named blades in the Murasame creative tab, got " + blades);
+                require(blades == 2, "Expected both named blades in the SlashBlade creative tab, got " + blades);
                 var soul = new EntityMurasameSoul(ModEntities.MURASAME_SOUL.get(), client.level);
                 require(client.getEntityRenderDispatcher().getRenderer(soul) != null, "Soul renderer missing");
                 var stone = new EmbeddedBladeStoneEntity(BlockPos.ZERO, ModBlocks.EMBEDDED_STONE.get().defaultBlockState());

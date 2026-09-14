@@ -4,7 +4,7 @@ import cn.adwadg.murasame.Entities.EntityMurasameSoul;
 import cn.adwadg.murasame.Registry.ModBlocks;
 import cn.adwadg.murasame.Registry.ModEntities;
 import cn.adwadg.murasame.Registry.SERegistry;
-import cn.adwadg.murasame.client.utils.MurasameBladeHelper;
+import cn.adwadg.murasame.util.MurasameBladeHelper;
 import cn.adwadg.murasame.client.utils.MurasameEvolutionTracker;
 import cn.adwadg.murasame.config.ModConfig;
 import cn.adwadg.murasame.events.PlayerSoulHandler;

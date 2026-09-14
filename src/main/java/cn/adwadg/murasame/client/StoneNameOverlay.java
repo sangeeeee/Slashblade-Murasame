@@ -1,7 +1,6 @@
 package cn.adwadg.murasame.client;
 
 import cn.adwadg.murasame.Murasame;
-import cn.adwadg.murasame.Registry.ModBlocks;
 import cn.adwadg.murasame.TileEntity.BlockEntity.EmbeddedBladeStoneEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -23,8 +22,7 @@ public final class StoneNameOverlay {
         if (client.level.getBlockEntity(hit.getBlockPos()) instanceof EmbeddedBladeStoneEntity stone) {
             if (!stone.isClientViewKnown()) return;
             name = stone.getClientDisplayName();
-        } else if (client.level.getBlockState(hit.getBlockPos()).is(ModBlocks.EMPTY_STONE.get())) {
-            name = Component.translatable("block.murasame.empty_stone");
+
         } else return;
         var gui = event.getGuiGraphics();
         int width = client.font.width(name);

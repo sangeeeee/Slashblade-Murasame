@@ -5,6 +5,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public class ModConfig {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.BooleanValue STONE_UNBREAKABLE;
 
     public static final ModConfigSpec.ConfigValue<Integer> GAINKILLNEEDED;
     public static final ModConfigSpec.ConfigValue<Integer> GAINLEVELNEEDED;
@@ -15,6 +16,10 @@ public class ModConfig {
 
     static {
         BUILDER.push("general");
+        STONE_UNBREAKABLE = BUILDER
+                .comment("嵌刀石是否不可破坏：阻止生存挖掘（创造模式可以破坏）、爆炸、生物破坏和活塞移动；命令仍可移除")
+                .define("stoneUnbreakable", true);
+
         GAINKILLNEEDED = BUILDER
                 .comment("拔刀需求亡灵击杀数|0~99999")
                 .defineInRange("killNeeded",500,0,99999);

@@ -1,7 +1,7 @@
 package cn.adwadg.murasame.TileEntity.BlockEntity;
 
 import cn.adwadg.murasame.Registry.ModEntities;
-import cn.adwadg.murasame.client.utils.MurasameBladeHelper;
+import cn.adwadg.murasame.util.MurasameBladeHelper;
 import cn.adwadg.murasame.network.StoneStatePacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -172,7 +172,7 @@ public class EmbeddedBladeStoneEntity extends BlockEntity {
     public boolean isClientViewKnown() { return clientViewKnown; }
     public boolean shouldRenderBlade() { return clientViewKnown && !clientClaimed; }
     public Component getClientDisplayName() {
-        return Component.translatable(clientClaimed ? "block.murasame.empty_stone" : "block.murasame.embedded_stone");
+        return Component.translatable(clientClaimed ? "block.murasame.embedded_stone.empty" : "block.murasame.embedded_stone");
     }
 
     @Override

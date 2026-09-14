@@ -123,7 +123,7 @@ public class PersonalStoneGameTests {
         var source = stone(helper, new BlockPos(1, 1, 1));
         use(source, player);
         var id = source.getStoneId();
-        // Deliberately emulate old/externally-created NBT items, bypassing the sanitized picker.
+        // Deliberately emulate externally-created NBT items, bypassing the sanitized picker.
         var copied = new ItemStack(ModBlocks.EMBEDDED_STONE_ITEM.get());
         copied.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(source.saveWithId(helper.getLevel().registryAccess())));
         var other = placeCopiedItem(helper, player, helper.absolutePos(new BlockPos(3, 1, 1)), copied.copy());
@@ -145,6 +145,48 @@ public class PersonalStoneGameTests {
         other.loadWithComponents(source.saveWithId(helper.getLevel().registryAccess()), helper.getLevel().registryAccess());
         helper.assertFalse(other.getStoneId().equals(source.getStoneId()), "Relocated structure reused identity");
         helper.assertFalse(other.hasClaimed(player.getUUID()), "Relocated structure copied claimants");
+        helper.succeed();
+    }
+
+    @GameTest(template = "test_empty")
+    public static void protectionSettingControlsExistingStones(GameTestHelper helper) {
+        boolean previous = ModConfig.STONE_UNBREAKABLE.get();
+        var player = qualified(helper);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.NETHERITE_PICKAXE));
+        var level = helper.getLevel();
+        try {
+            ModConfig.STONE_UNBREAKABLE.set(true);
+            for (var block : java.util.List.of(ModBlocks.EMBEDDED_STONE.get())) {
+                var pos = helper.absolutePos(new BlockPos(1, 1, 1));
+                level.setBlock(pos, block.defaultBlockState(), 3);
+                var state = level.getBlockState(pos);
+                helper.assertTrue(state.getDestroyProgress(player, level, pos) == 0, "Protected stone has mining progress");
+                helper.assertTrue(state.getPistonPushReaction() == net.minecraft.world.level.material.PushReaction.BLOCK, "Protected stone is movable");
+                helper.assertFalse(state.canEntityDestroy(level, pos, player), "Entity destruction was allowed");
+                player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+                helper.assertFalse(player.gameMode.destroyBlock(pos), "Protected stone broken in survival");
+                helper.assertTrue(level.getBlockState(pos).is(block), "Protected block disappeared");
+                player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+                helper.assertTrue(player.gameMode.destroyBlock(pos), "Creative player could not remove protected stone");
+                helper.assertTrue(level.getBlockState(pos).isAir(), "Creative removal left the block behind");
+                level.setBlock(pos, block.defaultBlockState(), 3);
+                level.explode(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2,
+                        net.minecraft.world.level.Level.ExplosionInteraction.BLOCK);
+                helper.assertTrue(level.getBlockState(pos).is(block), "Explosion destroyed protected stone");
+                ModConfig.STONE_UNBREAKABLE.set(false);
+                helper.assertTrue(state.getDestroyProgress(player, level, pos) > 0, "Disabling protection did not restore mining");
+                helper.assertTrue(state.getExplosionResistance(level, pos, null) == net.minecraft.world.level.block.Blocks.STONE.getExplosionResistance(), "Disabling protection did not restore blast resistance");
+                for (var mode : java.util.List.of(net.minecraft.world.level.GameType.SURVIVAL, net.minecraft.world.level.GameType.CREATIVE)) {
+                    player.setGameMode(mode);
+                    level.setBlock(pos, block.defaultBlockState(), 3);
+                    helper.assertTrue(player.gameMode.destroyBlock(pos), "Unprotected stone could not be broken in " + mode);
+                    helper.assertTrue(level.getBlockState(pos).isAir(), "Unprotected block remained");
+                }
+                ModConfig.STONE_UNBREAKABLE.set(true);
+            }
+        } finally {
+            ModConfig.STONE_UNBREAKABLE.set(previous);
+        }
         helper.succeed();
     }
 
