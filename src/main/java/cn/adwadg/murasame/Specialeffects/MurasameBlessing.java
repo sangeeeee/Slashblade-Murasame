@@ -21,7 +21,7 @@ public class MurasameBlessing extends SpecialEffect {
         return !user.level().isClientSide()
                 && "item.murasame.murasamemaru_awakened".equals(event.getSlashBladeState().getTranslationKey())
                 && event.getSlashBladeState().hasSpecialEffect(SERegistry.MURASAME_BLESSING.getId())
-                && SpecialEffect.isEffective(SERegistry.MURASAME_BLESSING.get(), user instanceof Player player ? player.experienceLevel : 50);
+                && SpecialEffect.isEffective(SERegistry.MURASAME_BLESSING.get(), user);
     }
 
     @SubscribeEvent

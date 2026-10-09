@@ -9,9 +9,9 @@
 客户端和服务器都安装以下两个模组：
 
 - `murasame-1.21.1-neoforge-2.0.0.jar`
-- [SlashBlade Resharped 2.0.7-1.21.1](https://modrinth.com/mod/slashblade-resharped/version/u02EDgAr)
+- [SlashBlade Resharped 2.1.9-1.21.1](https://modrinth.com/mod/slashblade-resharped/version/SA6IKdsb)
 
-已验证环境为 NeoForge **21.1.228**、Java **21**。依赖声明允许 NeoForge `[21.1.228,21.2)`、SlashBlade `[2.0.7,2.1)`；其他版本组合尚未逐一验证。无需额外安装 PlayerAnimator、JEI 等可选模组。
+已验证环境为 NeoForge **21.1.228**、Java **21**。依赖声明允许 NeoForge `[21.1.228,21.2)`、SlashBlade `[2.1.9-1.21.1,2.2)`；其他版本组合尚未逐一验证。无需额外安装 PlayerAnimator、JEI 等可选模组。
 
 不要将旧 Forge 1.20.1 版本与此版本同时放入 `mods`。本次移植不包含旧 Forge 世界或旧拔刀剑 Capability 存档的自动转换；需要迁移旧世界时，请先在备份副本中验证。
 

@@ -3,8 +3,8 @@
 ## 目标与依赖
 
 - Minecraft 1.21.1、NeoForge 21.1.228、Java 21、Gradle 8.14.3、ModDevGradle 2.0.141。
-- SlashBlade Resharped 正式发布包 2.0.7-1.21.1（Modrinth 版本 ID：`u02EDgAr`）。
-- 发布包 SHA-1：`d9ef461d1b2bc36cb2caeebe15be904f433e542c`。
+- SlashBlade Resharped 正式发布包 2.1.9-1.21.1（Modrinth 版本 ID：`SA6IKdsb`）。
+- 发布包 SHA-1：`649f6c1399273ffe250bd68f0a096804d8621a2d`。
 - 模组 ID 为 `murasame`，当前未发布版本统一为 **2.0.0**，不提供旧版本存档或源码兼容层。
 
 ## 实现变化
@@ -39,7 +39,18 @@ GameTest 已按生存不可破坏、创造可破坏的规则更新，使用真�
 
 ## 创造栏合并
 
-移除独立的 `murasame:murasame_tab` 注册，两把命名刀的 `creativeGroup` 改为 `slashblade:slashblade`，嵌刀石通过创造栏内容事件加入同一栏。独立空嵌刀石的注册和资源已移除。同步修正已有客户端检查的引用，本次按要求未运行测试；下方测试结果来自此前开发状态。
+移除独立的 `murasame:murasame_tab` 注册，两把命名刀的 `creativeGroup` 改为 `slashblade:slashblade`，嵌刀石通过创造栏内容事件加入同一栏。独立空嵌刀石的注册和资源已移除。客户端检查验证两把名刀及嵌刀石均出现在拔刀剑重锋创造栏。
+
+## 拔刀剑依赖更新（2026-10-09）
+
+依赖从 2.0.7-1.21.1 更新为 [2.1.9-1.21.1](https://modrinth.com/mod/slashblade-resharped/version/SA6IKdsb)，最低版本范围为 `[2.1.9-1.21.1,2.2)`。上游 JAR 已核对官方 SHA-1，源码参考提交为 `7645f5f283a2`。NeoForge 最低要求仍为 21.1.228，本模组版本保持 2.0.0。
+
+- 特殊效果的新接口接收使用者实体。丛雨祝福改为 `SpecialEffect.isEffective(effect, user)`，与上游物品提示及进度判定一致；未满 50 级和非玩家使用者不会绕过等级要求。
+- 新增的 `defaultSwordTypes` 组件由上游命名刀工厂自动写入，现有 JSON 无需迁移。验证基础刀存档往返和睡眠觉醒都保留刀类型数据。
+- 上游新增进度触发器，本模组的拔刀进度仍由服务端显式授予，保留当前实现。
+- 上游重构携刀渲染层，嵌刀石使用的 `BladeModelManager` / `BladeRenderState` 接口未改变，继续直接绘制武士刀 OBJ。
+- 连段、攻击管理、斩技注册及创造栏 API 没有需要迁移的调用；验证空间斩完整执行十次斩击并恢复移动。
+- 修正原版 GameTest 模拟玩家始终报告创造模式的问题；模式敏感检查使用普通 ServerPlayer 和本地测试连接，验证生存受保护而创造可破坏。
 
 ## 自动验证
 
@@ -62,7 +73,7 @@ GameTest 已按生存不可破坏、创造可破坏的规则更新，使用真�
 | 客户端纹理、两把创造栏刀、刀灵和嵌刀石渲染器 | 通过 |
 | 客户端实际发送切换包、服务器更新发送者偏好 | 通过 |
 
-此前开发状态的服务端为 **17 项 GameTest 全部通过**；客户端检查输出 `CLIENT_SMOKE_PASSED` 后正常退出。常规构建不启用或打包这些测试。
+新版依赖环境的服务端为 **17 项 GameTest 全部通过**；客户端检查输出 `CLIENT_SMOKE_PASSED` 后正常退出。常规构建不启用或打包这些测试。
 
 上游开发环境仍可能输出 SlashBlade refmap 提示、上游非标准资源文件名提示和原版声音/着色器提示；未修改外部依赖来隐藏这些输出。
 

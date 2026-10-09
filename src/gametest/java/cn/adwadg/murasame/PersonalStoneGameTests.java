@@ -151,7 +151,14 @@ public class PersonalStoneGameTests {
     @GameTest(template = "test_empty")
     public static void protectionSettingControlsExistingStones(GameTestHelper helper) {
         boolean previous = ModConfig.STONE_UNBREAKABLE.get();
-        var player = qualified(helper);
+        // GameTestHelper's mock permanently reports creative, even after setGameMode.
+        // Use a real ServerPlayer with the same local test connection for mode-sensitive checks.
+        var cookie = net.minecraft.server.network.CommonListenerCookie.createInitial(
+                new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "stone-test-player"), false);
+        var player = new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(), cookie.gameProfile(), cookie.clientInformation());
+        var connection = new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
+        new io.netty.channel.embedded.EmbeddedChannel(connection);
+        helper.getLevel().getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.NETHERITE_PICKAXE));
         var level = helper.getLevel();
         try {

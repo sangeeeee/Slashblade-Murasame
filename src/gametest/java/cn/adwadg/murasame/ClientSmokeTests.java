@@ -66,6 +66,8 @@ public final class ClientSmokeTests {
                 long blades = mods.flammpfeil.slashblade.SlashBladeCreativeGroup.SLASHBLADE_GROUP.get().getDisplayItems().stream()
                         .filter(stack -> BladeStateAccess.of(stack).map(state -> state.getTranslationKey().startsWith("item.murasame.")).orElse(false)).count();
                 require(blades == 2, "Expected both named blades in the SlashBlade creative tab, got " + blades);
+                require(mods.flammpfeil.slashblade.SlashBladeCreativeGroup.SLASHBLADE_GROUP.get().getDisplayItems().stream()
+                        .anyMatch(stack -> stack.is(ModBlocks.EMBEDDED_STONE_ITEM.get())), "Stone missing from the SlashBlade creative tab");
                 var soul = new EntityMurasameSoul(ModEntities.MURASAME_SOUL.get(), client.level);
                 require(client.getEntityRenderDispatcher().getRenderer(soul) != null, "Soul renderer missing");
                 var stone = new EmbeddedBladeStoneEntity(BlockPos.ZERO, ModBlocks.EMBEDDED_STONE.get().defaultBlockState());

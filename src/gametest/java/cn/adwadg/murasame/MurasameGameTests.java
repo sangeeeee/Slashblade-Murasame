@@ -57,6 +57,16 @@ public class MurasameGameTests {
                 player.getPersistentData().putBoolean("tested", true);
             }
         }
+        var underLevel = helper.makeMockServerPlayerInLevel();
+        underLevel.experienceLevel = 49;
+        underLevel.setHealth(4);
+        var inactive = new mods.flammpfeil.slashblade.event.SlashBladeEvent.DoSlashEvent(blade, state, underLevel, 0, false, 10,
+                mods.flammpfeil.slashblade.util.KnockBacks.cancel);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(inactive);
+        helper.assertFalse(inactive.isCritical(), "Blessing activated below the required level");
+        helper.assertTrue(inactive.getDamage() == 10, "Inactive blessing increased damage");
+        var mob = net.minecraft.world.entity.EntityType.ZOMBIE.create(helper.getLevel());
+        helper.assertFalse(mods.flammpfeil.slashblade.registry.specialeffects.SpecialEffect.isEffective(SERegistry.MURASAME_BLESSING.get(), mob), "Non-player bypassed the effect level requirement");
         helper.succeed();
     }
 
@@ -92,6 +102,8 @@ public class MurasameGameTests {
         helper.assertTrue(blade.getEnchantmentLevel(registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SHARPNESS)) == 5, "Base enchantments missing");
         ItemStack restored = ItemStack.parse(registries, blade.save(registries)).orElseThrow();
         helper.assertTrue(ItemStack.isSameItemSameComponents(blade, restored), "Blade components did not survive saving");
+        helper.assertTrue(state.getDefaultSwordTypes().contains(mods.flammpfeil.slashblade.item.SwordType.BEWITCHED), "Definition did not populate the new sword-type component");
+        helper.assertTrue(BladeStateAccess.of(restored).orElseThrow().getDefaultSwordTypes().equals(state.getDefaultSwordTypes()), "Sword types did not survive saving");
         var awakened = registries.lookupOrThrow(SlashBladeDefinition.REGISTRY_KEY)
                 .getOrThrow(ResourceKey.create(SlashBladeDefinition.REGISTRY_KEY, id("murasamemaru_awakened"))).value().getBlade(registries);
         helper.assertTrue(BladeStateAccess.of(awakened).orElseThrow().hasSpecialEffect(SERegistry.MURASAME_BLESSING.getId()), "Awakened blessing missing");
@@ -111,6 +123,7 @@ public class MurasameGameTests {
         helper.assertTrue(state.getTranslationKey().endsWith("murasamemaru_awakened"), "Blade did not awaken");
         helper.assertTrue(state.getRefine() == 7 && state.getKillCount() == ModConfig.EVKILLNEEDED.get(), "Evolution lost existing progress");
         helper.assertFalse(MurasameEvolutionTracker.isValidBlade(blade), "Blade can evolve twice");
+        helper.assertTrue(state.getDefaultSwordTypes().contains(mods.flammpfeil.slashblade.item.SwordType.BEWITCHED), "Evolution lost the default sword types");
         var restored = ItemStack.parse(player.registryAccess(), blade.save(player.registryAccess())).orElseThrow();
         helper.assertTrue(BladeStateAccess.of(restored).orElseThrow().getBaseAttackModifier() == 40F, "Awakened stats not persisted");
         helper.succeed();
