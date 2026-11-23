@@ -1,5 +1,7 @@
 # NeoForge 1.21.1 移植记录
 
+> 本文保留 2.0.0 / SlashBlade 2.1.9 / NeoForge 21.1.228 的历史实现与实机验证记录，不代表新依赖环境已经重新通过游戏内测试。当前 2.0.1 的依赖及验证范围见 [SlashBlade 2.2.1 更新记录](SLASHBLADE_2_2_1.md)。
+
 ## 目标与依赖
 
 - Minecraft 1.21.1、NeoForge 21.1.228、Java 21、Gradle 8.14.3、ModDevGradle 2.0.141。

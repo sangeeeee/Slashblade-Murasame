@@ -2,16 +2,16 @@
 
 为 SlashBlade Resharped 添加名刀「丛雨丸」、觉醒形态、丛雨刀灵、丛雨祝福、空间斩与樱花林神社。
 
-当前分支已移植至 **Minecraft 1.21.1 / NeoForge / Java 21**，模组版本为 **2.0.0**。
+当前分支已移植至 **Minecraft 1.21.1 / NeoForge / Java 21**，模组版本为 **2.0.1**。
 
 ## 安装
 
 客户端和服务器都安装以下两个模组：
 
-- `murasame-1.21.1-neoforge-2.0.0.jar`
-- [SlashBlade Resharped 2.1.9-1.21.1](https://modrinth.com/mod/slashblade-resharped/version/SA6IKdsb)
+- `murasame-1.21.1-neoforge-2.0.1.jar`
+- SlashBlade Resharped **2.2.1-1.21.1**
 
-已验证环境为 NeoForge **21.1.228**、Java **21**。依赖声明允许 NeoForge `[21.1.228,21.2)`、SlashBlade `[2.1.9-1.21.1,2.2)`；其他版本组合尚未逐一验证。无需额外安装 PlayerAnimator、JEI 等可选模组。
+当前构建目标为 NeoForge **21.1.267**、Java **21**。依赖声明允许 NeoForge `[21.1.267,21.2)`，SlashBlade 限定为本次核对的 `[2.2.1-1.21.1]`。生产源码及现有 GameTest 源码已针对这些依赖编译通过，本次尚未重新执行游戏内测试。无需额外安装 PlayerAnimator、JEI 等可选模组。
 
 不要将旧 Forge 1.20.1 版本与此版本同时放入 `mods`。本次移植不包含旧 Forge 世界或旧拔刀剑 Capability 存档的自动转换；需要迁移旧世界时，请先在备份副本中验证。
 
@@ -30,7 +30,7 @@
 - 默认不可破坏：阻止生存挖掘（创造模式可以破坏）、爆炸、生物破坏和活塞移动，管理员命令仍可移除。关闭保护后，破坏会使其对所有玩家消失，普通工具和精准采集均无掉落。
 - 创造模式 Ctrl+鼠标中键复制时不携带实例编号或领取记录。即使物品来自命令或外部工具并带有 NBT，重新放置也会创建全新记录；放回原坐标同样如此。创造模式可以制造新的可领取石头，这是放置新实例的预期行为。
 - 复制结构到其他坐标或维度时重置记录；原地正常读档保留记录。
-- 客户端和服务器须同时更新到 2.0.0。
+- 客户端和服务器须同时更新到 2.0.1。
 
 游戏规则改用服务器配置：`<世界目录>/serverconfig/murasame-server.toml`。原有六个配置键和默认值保持不变：`killNeeded`、`levelNeeded`、`effectsNeeded`、`gainCleanLevel`、`evKillNeeded`、`evPSNeeded`。旧 `murasame-common.toml` 不会自动迁入；需要自定义默认值时可放入 `defaultconfigs/murasame-server.toml`。
 
@@ -45,7 +45,9 @@ stoneUnbreakable = true
 
 ## 构建与验证
 
-需要 Java 21，首次构建需要联网下载 Gradle、NeoForge 和 SlashBlade。Windows 使用 `gradlew.bat`，Linux/macOS 使用 `./gradlew`。
+需要 Java 21，首次构建需要联网下载 Gradle、NeoForge。Windows 使用 `gradlew.bat`，Linux/macOS 使用 `./gradlew`。
+
+在 Journey Beyond 工作区构建时，通过 `gradle.properties` 的 `modpack_mods_dir` 读取整合包内的 SlashBlade 2.2.1 JAR，确保编译依赖与正式客户端一致；目录存在但缺少目标 JAR 或存在多个匹配项时直接报错。在独立检出的项目中，该目录不存在时回退到 Modrinth Maven 依赖。
 
 ```powershell
 .\gradlew.bat build
@@ -72,7 +74,7 @@ stoneUnbreakable = true
 
 首次启动如出现无障碍引导，点击继续。检查会进入该测试世界，验证两把刀的 OBJ 模型、纹理、创造栏、渲染器，个人嵌刀石模型/名称同步，以及真实客户端到服务器的刀灵切换包，输出 `CLIENT_SMOKE_PASSED` 后自动关闭。只对这个可丢弃的测试世界启用该选项。
 
-已通过的验证及剩余人工检查项见 [移植验证记录](docs/NEOFORGE_PORT.md)。
+2.0.1 的代码核对与构建范围见 [SlashBlade 2.2.1 更新记录](docs/SLASHBLADE_2_2_1.md)。此前 2.0.0 环境中的游戏内验证见 [历史移植验证记录](docs/NEOFORGE_PORT.md)。
 
 ## 源码说明
 
